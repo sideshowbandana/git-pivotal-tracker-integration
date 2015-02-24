@@ -20,12 +20,9 @@ require 'git-pivotal-tracker-integration/util/story'
 require 'pivotal-tracker'
 
 # The class that encapsulates starting a Pivotal Tracker Story
-class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegration::Command::Base
+class GitPivotalTrackerIntegration::Command::Review < GitPivotalTrackerIntegration::Command::Base
 
-  # Starts a Pivotal Tracker story by doing the following steps:
-  # * Create a branch
-  # * Add default commit hook
-  # * Start the story on Pivotal Tracker
+  # Pushes code up for review
   #
   # @param [String, nil] filter a filter for selecting the story to start.  This
   #   filter can be either:
@@ -34,33 +31,16 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
   #   * +nil+
   # @return [void]
   def run(filter)
-    story = GitPivotalTrackerIntegration::Util::Story.select_story @project, filter
+    branch_name = GitPivotalTrackerIntegration::Util::Git.branch_name
+    print "Pushing to origin... "
+    GitPivotalTrackerIntegration::Util::Shell.exec "git push -f --quiet origin #{branch_name}"
+    puts 'OK'
 
-    GitPivotalTrackerIntegration::Util::Story.pretty_print story
-
-    development_branch_name = development_branch_name story
-    GitPivotalTrackerIntegration::Util::Git.create_branch development_branch_name
-    @configuration.story = story
-
-    GitPivotalTrackerIntegration::Util::Git.add_hook 'prepare-commit-msg', File.join(File.dirname(__FILE__), 'prepare-commit-msg.sh')
-
-    start_on_tracker story
-  end
-
-  private
-
-  def development_branch_name(story)
-    branch_name = "#{story.story_type}/#{story.id}-" + ask("Enter branch name (#{story.story_type}/#{story.id}-<branch-name>): ")
-    puts
-    branch_name
-  end
-
-  def start_on_tracker(story)
-    print 'Starting story on Pivotal Tracker... '
-    story.update(
-      :current_state => 'started'
-    )
+    puts "Pushing to gerrit... "
+    GitPivotalTrackerIntegration::Util::Shell.exec "git push gerrit HEAD:refs/for/develop/#{branch_name}"
     puts 'OK'
   end
 
+  private
+  
 end

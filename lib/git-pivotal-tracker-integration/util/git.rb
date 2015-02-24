@@ -15,6 +15,7 @@
 
 require 'git-pivotal-tracker-integration/util/shell'
 require 'git-pivotal-tracker-integration/util/util'
+require "pry-byebug"
 
 # Utilities for dealing with Git
 class GitPivotalTrackerIntegration::Util::Git
@@ -48,7 +49,18 @@ class GitPivotalTrackerIntegration::Util::Git
   #
   # @return [String] the name of the currently checked out branch
   def self.branch_name
-    GitPivotalTrackerIntegration::Util::Shell.exec('git branch').scan(/\* (.*)/)[0][0]
+    @branch_name ||= GitPivotalTrackerIntegration::Util::Shell.exec('git branch').scan(/\* (.*)/)[0][0]
+  end
+
+  def self.remote_branch_name
+  end
+
+  def self.tracking_branch
+    return @tracking_branch if @tracking_branch
+    branch = (get_config KEY_MERGE, :branch).split("/").last || "develop"
+    remote = get_config(KEY_REMOTE, :branch)
+    remote = "upstream" if remote.empty?
+    @tracking_branch = "remotes/#{remote}/#{branch}"
   end
 
   # Creates a branch with a given +name+.  First pulls the current branch to
@@ -60,17 +72,18 @@ class GitPivotalTrackerIntegration::Util::Git
   # @return [void]
   def self.create_branch(name, print_messages = true)
     root_branch = branch_name
-    root_remote = get_config KEY_REMOTE, :branch
-
-    if print_messages; print "Pulling #{root_branch}... " end
-    GitPivotalTrackerIntegration::Util::Shell.exec 'git pull --quiet --ff-only'
-    if print_messages; puts 'OK'
-    end
+    root_remote = get_config(KEY_REMOTE, :branch) || "upstream"
+    
+    # if print_messages; print "Pulling #{root_branch}... " end
+    # GitPivotalTrackerIntegration::Util::Shell.exec 'git pull --quiet --ff-only'
+    # if print_messages; puts 'OK'
+    # end
 
     if print_messages; print "Creating and checking out #{name}... " end
-    GitPivotalTrackerIntegration::Util::Shell.exec "git checkout --quiet -b #{name}"
-    set_config KEY_ROOT_BRANCH, root_branch, :branch
-    set_config KEY_ROOT_REMOTE, root_remote, :branch
+    GitPivotalTrackerIntegration::Util::Shell.exec 'git fetch --all --quiet'
+    GitPivotalTrackerIntegration::Util::Shell.exec "git checkout --quiet -b #{name} #{tracking_branch}"
+    # set_config KEY_ROOT_BRANCH, root_branch, :branch
+    # set_config KEY_ROOT_REMOTE, root_remote, :branch
     if print_messages; puts 'OK'
     end
   end
@@ -232,6 +245,8 @@ class GitPivotalTrackerIntegration::Util::Git
 
   private
 
+  KEY_MERGE = "merge".freeze
+  
   KEY_REMOTE = 'remote'.freeze
 
   KEY_ROOT_BRANCH = 'root-branch'.freeze
