@@ -12,14 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+require "./lib/git-pivotal-tracker-integration/version"
 
 Gem::Specification.new do |s|
   s.name        = 'git-pivotal-tracker-integration'
-  s.version     = '1.5.0.dev'
+  s.version     = GitPivotalTrackerIntegration::VERSION
   s.summary     = 'Git commands for integration with Pivotal Tracker'
   s.description = 'Provides a set of additional Git commands to help developers when working with Pivotal Tracker'
-  s.authors     = ['Ben Hale']
-  s.email       = 'nebhale@nebhale.com'
+  s.authors     = ['Ben Hale', "Kyle Barton"]
+  s.email       = ['nebhale@nebhale.com', "kyle.humberto@gmail.com"]
   s.homepage    = 'https://github.com/nebhale/git-pivotal-tracker-integration'
   s.license     = 'Apache-2.0'
 
