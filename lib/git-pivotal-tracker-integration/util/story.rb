@@ -95,6 +95,7 @@ class GitPivotalTrackerIntegration::Util::Story
 
   def self.find_story(project, type, limit)
     criteria = {
+      :owned_by => GitPivotalTrackerIntegration::Util::Git.get_config('user.name'),
       :current_state => CANDIDATE_STATES,
       :limit => limit
     }
