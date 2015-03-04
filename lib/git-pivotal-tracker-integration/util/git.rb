@@ -49,7 +49,7 @@ class GitPivotalTrackerIntegration::Util::Git
   #
   # @return [String] the name of the currently checked out branch
   def self.branch_name
-    @branch_name ||= GitPivotalTrackerIntegration::Util::Shell.exec('git branch').scan(/\* (.*)/)[0][0]
+    GitPivotalTrackerIntegration::Util::Shell.exec('git branch').scan(/\* (.*)/)[0][0]
   end
 
   def self.remote_branch_name

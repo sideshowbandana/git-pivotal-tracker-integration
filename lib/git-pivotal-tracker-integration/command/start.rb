@@ -34,7 +34,7 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
   #   * +nil+
   # @return [void]
   def run(filter)
-    story = GitPivotalTrackerIntegration::Util::Story.select_story @project, filter
+    story = GitPivotalTrackerIntegration::Util::Story.select_story @project, filter, 20
 
     GitPivotalTrackerIntegration::Util::Story.pretty_print story
 

@@ -28,11 +28,31 @@ class GitPivotalTrackerIntegration::Command::Finish < GitPivotalTrackerIntegrati
   #
   # @return [void]
   def run(argument)
-    no_complete = argument =~ /--no-complete/
+    @story = @configuration.story(@project)
+    finish_on_tracker
+    remove_remote_branch
+    # no_complete = argument =~ /--no-complete/
 
-    GitPivotalTrackerIntegration::Util::Git.trivial_merge?
-    GitPivotalTrackerIntegration::Util::Git.merge(@configuration.story(@project), no_complete)
-    GitPivotalTrackerIntegration::Util::Git.push GitPivotalTrackerIntegration::Util::Git.branch_name
+    # GitPivotalTrackerIntegration::Util::Git.trivial_merge?
+    # GitPivotalTrackerIntegration::Util::Git.merge(@configuration.story(@project), no_complete)
+    # GitPivotalTrackerIntegration::Util::Git.push GitPivotalTrackerIntegration::Util::Git.branch_name
+  end
+
+  private
+  def finish_on_tracker
+    print 'Finishing story on Pivotal Tracker... '
+    state = @story.story_type == "chore" ? "accepted" : "finished"
+    @story.update(
+      :current_state => state
+    )
+    puts 'OK'
+  end
+
+  def remove_remote_branch
+    branch_name = GitPivotalTrackerIntegration::Util::Git.branch_name
+    print "Removing #{branch_name} from origin... "
+    GitPivotalTrackerIntegration::Util::Shell.exec "git push -f --quiet origin :#{branch_name}"
+    puts 'OK'
   end
 
 end

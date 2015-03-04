@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CURRENT_BRANCH=$(git branch | grep "*" | sed "s/* //")
+CURRENT_BRANCH=$(git branch | grep "^*" | sed "s/* //")
 STORY_ID=$(git config branch.$CURRENT_BRANCH.pivotal-story-id)
 
 if [[ $2 != "commit" && -n $STORY_ID ]]; then
